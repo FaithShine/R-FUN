@@ -1,4 +1,0 @@
-Read me!
-–––––––––––––––––––––––––
-1. The file ass5.html is for the assignment of FIT 5147 Data Visualization
-2. Please use the Firefox Browser open it. When it run in the Google Chrome Browser, it will report cross origin error
