@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+
+	<style type="text/css">
+		
+		div.tooltip {	
+		    position: absolute;			
+		    text-align: center;			
+		    width: 160px;					
+		    height: 40px;					
+		    padding: 2px;				
+		    font: 12px sans-serif;		
+		    background: lightsteelblue;	
+		    border: 0px;		
+		    border-radius: 8px;			
+		    pointer-events: none;			
+		}
+	
+	</style>
+</head>
+<body>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js" > </script>
+<script type="text/javascript">
+                         
+	// load the data
+	d3.json("data-03.json", function(data) {
+		
+		//Create basic SVG element
+		var canvas = d3.select("body")
+					.append("svg")
+					.attr("width", 1200)
+					.attr("height", 700)
+
+		// set parameter for path
+        // var pathData = [];    
+        // var strokeData = [];
+		
+		var x1=0, y1=0 // initialize line start point
+		var x2=0, y2=0 // initialize line end point
+
+		// draw line between two sites in trading relationship
+        data.links.forEach(function(d){
+
+        	var nodeOrgin = d.node01;
+        	var nodeDest = d.node02;
+        	var amount = d.amount;
+
+        	data.nodes.forEach(function(d){
+
+  
+        		if(d.id == nodeOrgin){
+        			x1 = d.x
+        			y1 = d.y     			
+        		}
+        		if(d.id ==  nodeDest){
+        			x2 = d.x
+        			y2 = d.y
+        		}  
+        	})
+    		canvas.append("line")
+				.attr("x1", x1)
+				.attr("y1", y1)
+				.attr("x2", x2)
+				.attr("y2", y2)
+				.attr("stroke", "blue")
+				.attr("stroke-width", function(){
+					return 2*amount/800;
+				})
+				.append("title")
+				.text(function(){
+					return "Node1: " + nodeOrgin + " Node2: " + nodeDest + " Amount: " + amount;
+				})
+
+			// strokeData.push(2*amount/100);
+        });
+
+   //      data.links.forEach(function(d){
+   //      	var nodeOrgin = d.node01;
+   //      	var nodeDest = d.node02;
+   //      	var amount = d.amount;
+   //      	data.nodes.forEach(function(d){
+   //      		if(d.id == nodeOrgin || d.id == nodeDest){
+   //      			pathData.push(d);
+   //      		}
+   //      	})
+			// strokeData.push(2*amount/100);
+   //      });
+
+		// var lineFunction = d3.svg.line()
+  //                         .x(function(d) { return d.x; })
+  //                         .y(function(d) { return d.y; })
+  //                         .interpolate("linear")
+
+		// var strokeWidthIndex = 0;
+		// var i = 0;
+		// // draw line
+		// console.log(pathData)
+/*
+		var lineGraph = canvas.append("path")
+							.datum(data.links)
+							.attr("class", "tradeLine")							
+                            .attr("d", lineFunction(pathData))
+                            .attr("stroke", "blue")
+                            // .attr("stroke-width", 0.16)
+                            .attr("stroke-width", function(d){
+                            	// console.log(d)
+                            	var strokeWidth = strokeData[strokeWidthIndex];
+                            	strokeWidthIndex++;
+                            	return strokeWidth;
+                            })
+                            .attr("fill", "none")
+                            .append("title")
+       						.text(function(d){
+       								console.log(i)
+       								var node01 = d[i].node01
+       								var node02 = d[i].node02
+       								var amount = d[i].amount
+       								console.log(node01)
+       								console.log(node02)
+       								console.log(amount)
+       								i++
+       								return "Node1: " + node01 + " Node2: " + node02 + " Amount: " + amount;       							
+       						});
+*/
+
+		//various colors for distinguish each site
+		var colors = ["red", "yellow", "blue", "brown", "purple",
+					"grey", "pink", "orange", "cyan", "green"];
+		var colorIndex = 0;
+
+		// Define the div for the tooltip
+		var div = d3.select("body").append("div")	
+		    		.attr("class", "tooltip")				
+		    		.style("opacity", 0);
+
+		var site_amount = 0 // the trade amount of each site
+		var tradeLines = 0 // the number trade lines of each site
+
+		// draw sites as Circles
+		var sites = canvas.selectAll("circle")
+						.data(data.nodes)
+						.enter()
+						.append("circle")
+						.attr("class", "sites")
+			            .attr("cx", function(d) { return d.x; })
+			            .attr("cy", function(d) { return d.y; })
+			            .attr("r", function(d) { 
+			        		site_amount = 0
+			        		var site = d.id            	
+			            	data.links.forEach(function(d){
+				            	if(site == d.node01 ||  site == d.node02){
+				            		site_amount += d.amount;	            		
+				            	}
+			            	});
+			            	return site_amount/100;
+			            })
+			            .style("fill", function(){
+			            	var color = colors[colorIndex];
+			            	colorIndex++;
+			            	return color;
+			             })
+			            .on("mouseover", function(d){ //show site information
+							div.transition()		
+			                	.duration(200)		
+			                	.style("opacity", .9);
+
+			        		site_amount = 0
+			        		tradeLines = 0
+			        		var site = d.id            	
+			            	data.links.forEach(function(d){
+				            	if(site == d.node01 ||  site == d.node02){
+				            		site_amount += d.amount;
+				            		tradeLines++	            		
+				            	}
+			            	});		
+			            	div.html(d.id + "<br ／>" 
+			            				+ "TotalTradeAmount: " + site_amount + "<br ／>"
+			            				+ "Trade Lines: " + tradeLines)	  
+			            		.style("left", (d3.event.pageX) + "px")		
+			                	.style("top", (d3.event.pageY - 28) + "px");          	
+			            })
+						.on("mouseout", function(d) {		
+				            div.transition()		
+				                .duration(500)		
+				                .style("opacity", 0);	
+			    		})            
+
+        // draw static site name
+
+        // canvas.selectAll("text")
+        // 	.data(data.nodes)
+        // 	.enter()
+        // 	.append("text")
+        // 	.text(function(d) { return d.id; })
+        // 	.attr("x", function(d) { return d.x; })
+        // 	.attr("y", function(d) { return d.y; })
+
+	});
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<head>
+	<style>
+
+  
+
+	</style>
+</head>
+
+<body>
+	
+<script src="http://d3js.org/d3.v3.min.js"></script>
+
+<script>
+// set the dimensions of the canvas
+var margin = {top: 20, right: 20, bottom: 70, left: 40},
+    width = 1300 - margin.left - margin.right,
+    height = 1000 - margin.top - margin.bottom;
+
+
+// set the ranges
+var x = d3.scale.ordinal().rangeRoundBands([0, width], .05);
+var y = d3.scale.linear().range([height, 0]);
+
+// add the SVG element
+var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+// load the data
+d3.json("data.json", function(error, data) {
+    if(error) throw error;
+
+    var x1=0, y1=0
+    var x2=0, y2=0
+    data.links.forEach(function(d){
+
+      var nodeOrgin = d.node01;
+      var nodeDest = d.node02;
+      var amount = d.amount;
+
+      data.nodes.forEach(function(d){
+        if(d.id == nodeOrgin){
+          x1 = d.x
+          y1 = d.y          
+        }
+        if(d.id ==  nodeDest){
+          x2 = d.x
+          y2 = d.y
+        }  
+      })
+
+      svg.append("line")
+          .attr("x1", x1)
+          .attr("y1", y1)
+          .attr("x2", x2)
+          .attr("y2", y2)
+          .attr("stroke", "blue")
+          .attr("stroke-width", function(){
+            return 2*amount/800;
+          })
+          .append("title")
+          .text(function(){
+            return "Node1: " + nodeOrgin + " Node2: " + nodeDest + " Amount: " + amount;
+          })
+
+      // strokeData.push(2*amount/100);
+    });
+
+    
+    console.log(data)
+  //Add circle
+    svg.selectAll("circle")
+    .data(data.nodes)
+    .enter()
+    .append("circle")
+      .attr("cx", function(d) { return d.x; })
+      .attr("cy", function(d) { return d.y; })
+       .attr("r", function(d) { 
+          var site_amount = 0
+          var site = d.id             
+             data.links.forEach(function(d){
+              if(site == d.node01 ||  site == d.node02){
+               site_amount += d.amount;               
+              }
+             });
+             return site_amount/100;
+            })
+
+
+});
+
+</script>
+
+</body>

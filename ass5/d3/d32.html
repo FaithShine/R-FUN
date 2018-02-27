@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+    <body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js" charset="utf-8">
+</script>
+    <svg width="720" height="120">
+  <circle cx="40" cy="60" r="10"></circle>
+  <circle cx="80" cy="60" r="10"></circle>
+  <circle cx="120" cy="60" r="10"></circle>
+</svg>
+
+	<script type="text/javascript">
+var circle = d3.selectAll("circle");  // select all circles
+circle.style("fill", "red");  // change colour
+circle.attr("r", 30);  // change radius		
+
+// circle.attr("cx", function() { return Math.random() * 720; });  // function returns a random location on the x axis, 
+// see Step 2 above, x is up to 720, .attr applies it to "cx" (should be a constant...)
+// circle.attr("r", function() { return Math.random() * 50; });  
+// random size function
+
+circle.data([36, 64, 144]);
+circle.attr("r", function(d) { return Math.sqrt(d); });
+
+// circle.attr("r", function(d) { return Math.sqrt(d) * 2; });
+// circle.attr("r", function(d) { return Math.sqrt(d); *2});
+
+circle.style("fill",function() { return "hsl(" + Math.random() * 360 + ",100%,50%)"; })
+	</script>
+
+    </body>
+</html>
